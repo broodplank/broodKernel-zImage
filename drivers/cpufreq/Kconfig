@@ -102,14 +102,36 @@ config CPU_FREQ_DEFAULT_GOV_ONDEMAND
 config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	bool "conservative"
 	select CPU_FREQ_GOV_CONSERVATIVE
-	select CPU_FREQ_GOV_PERFORMANCE
+	select CPU_FREQ_GOV_ONDEMAND
 	help
 	  Use the CPUFreq governor 'conservative' as default. This allows
 	  you to get a full dynamic frequency capable system by simply
 	  loading your cpufreq low-level hardware driver.
 	  Be aware that not all cpufreq drivers support the conservative
 	  governor. If unsure have a look at the help section of the
-	  driver. Fallback governor will be the performance governor.
+	  driver. Fallback governor will be the ondemand governor.
+
+config CPU_FREQ_DEFAULT_GOV_SMARTASS2
+	bool "smartass2"
+	select CPU_FREQ_GOV_SMARTASS2
+	select CPU_FREQ_GOV_ONDEMAND
+	help
+	  Use the CPUFreq governor 'smartassV2' as default.
+
+config CPU_FREQ_DEFAULT_GOV_INTERACTIVEX
+	bool "interactiveX"
+	select CPU_FREQ_GOV_INTERACTIVEX
+	select CPU_FREQ_GOV_ONDEMAND
+	help
+	  Use the CPUFreq governor 'interactiveX' as default.
+
+config CPU_FREQ_DEFAULT_GOV_MINMAX
+	bool "minmax"
+	select CPU_FREQ_GOV_MINMAX
+	select CPU_FREQ_GOV_ONDEMAND
+	help
+	  Use the CPUFreq governor 'minmax' as default.
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -190,4 +212,23 @@ config CPU_FREQ_GOV_CONSERVATIVE
 
 	  If in doubt, say N.
 
+config CPU_FREQ_GOV_SMARTASS2
+	  tristate "'smartassV2' cpufreq governor"
+	  depends on CPU_FREQ
+	  help
+	      'smartassV2' - a "smart" optimized governor!
+
+config CPU_FREQ_GOV_INTERACTIVEX
+	  tristate "'interactiveX' cpufreq governor"
+	  depends on CPU_FREQ
+	  help
+	       'interactiveX' - interactiveX
+
+config CPU_FREQ_GOV_MINMAX
+	  tristate "'minmax' cpufreq governor"
+	  depends on CPU_FREQ
+	  help
+	       'minmax' - minmax
+
 endif	# CPU_FREQ
+
