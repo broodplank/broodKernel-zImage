@@ -237,6 +237,8 @@ static int menu_select(struct cpuidle_device *dev)
 	unsigned int power_usage = -1;
 	int i;
 	int multiplier;
+	
+	struct timespec t;
 
 	if (data->needs_update) {
 		menu_update(dev);
@@ -252,8 +254,7 @@ static int menu_select(struct cpuidle_device *dev)
 
 	/* determine the expected residency time, round up */
 	data->expected_us =
-	    DIV_ROUND_UP((u32)ktime_to_ns(tick_nohz_get_sleep_length()), 1000);
-
+	    t.tv_sec * USEC_PER_SEC + t.tv_nsec / NSEC_PER_USEC;
 
 	data->bucket = which_bucket(data->expected_us);
 
