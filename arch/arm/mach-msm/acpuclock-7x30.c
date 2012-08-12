@@ -41,6 +41,9 @@
 
 #define PLL2_L_VAL_ADDR		(MSM_CLK_CTL_BASE + 0x33C)
 
+#define ARIESVE_ACPU_MIN_UV_MV 750U
+#define ARIESVE_ACPU_MAX_UV_MV 1350U
+
 #define dprintk(msg...) \
 	cpufreq_debug_printk(CPUFREQ_DEBUG_DRIVER, "cpufreq-msm", msg)
 
@@ -152,7 +155,7 @@ unsigned long acpuclk_wait_for_irq(void)
 
 static int acpuclk_set_acpu_vdd(struct clkctl_acpu_speed *s)
 {
-	int ret = msm_spm_set_vdd(0, s->vdd_raw);
+	int ret = msm_spm_set_vdd(s->vdd_raw);
 	if (ret)
 		return ret;
 
@@ -419,3 +422,41 @@ void __init msm_acpu_clock_init(struct msm_acpu_clock_platform_data *clkdata)
 	cpufreq_frequency_table_get_attr(freq_table, smp_processor_id());
 #endif
 }
+#ifdef CONFIG_CPU_FREQ_VDD_LEVELS
+
+ssize_t acpuclk_get_vdd_levels_str(char *buf)
+{
+    int i, len = 0;
+    if (buf)
+    {
+      mutex_lock(&drv_state.lock);
+      for (i = 0; acpu_freq_tbl[i].acpu_clk_khz; i++)
+    {
+    len += sprintf(buf + len, "%8u: %4d\n", acpu_freq_tbl[i].acpu_clk_khz, acpu_freq_tbl[i].vdd_mv);
+    }
+    mutex_unlock(&drv_state.lock);
+    }
+    return len;
+    }
+
+    void acpuclk_set_vdd(unsigned int khz, int vdd)
+    {
+    int i;
+    unsigned int new_vdd;
+    vdd = vdd / V_STEP * V_STEP;
+    mutex_lock(&drv_state.lock);
+    for (i = 0; acpu_freq_tbl[i].acpu_clk_khz; i++)
+    {
+    if (khz == 0)
+    new_vdd = min(max((acpu_freq_tbl[i].vdd_mv + vdd), ARIESVE_ACPU_MIN_UV_MV), ARIESVE_ACPU_MAX_UV_MV);
+    else if (acpu_freq_tbl[i].acpu_clk_khz == khz)
+    new_vdd = min(max((unsigned int)vdd, ARIESVE_ACPU_MIN_UV_MV), ARIESVE_ACPU_MAX_UV_MV);
+    else continue;
+
+    acpu_freq_tbl[i].vdd_mv = new_vdd;
+    acpu_freq_tbl[i].vdd_raw = VDD_RAW(new_vdd);
+    }
+    mutex_unlock(&drv_state.lock);
+}
+
+#endif
