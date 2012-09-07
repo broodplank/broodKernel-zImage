@@ -896,9 +896,10 @@ static void msm_batt_chg_en(chg_enable_type enable)
 			pr_info("[BATT] %s: Start charging! (charging_source = USB)\n", __func__);
 			hsusb_chg_connected_ext(USB_CHG_TYPE__SDP);
 			//hsusb_chg_vbus_draw_ext(450); // USB charging	(400mA)
-			//hsusb_chg_vbus_draw_ext(500); // USB charging	(450mA)
+			hsusb_chg_vbus_draw_ext(500); // USB charging	(450mA)
 			// EXPERIMENTAL
-			hsusb_chg_vbus_draw_ext(650); // USB charging	(600mA)
+			// Causes corrupt sdcard transfer
+			// hsusb_chg_vbus_draw_ext(650); // USB charging	(600mA)
 			// EXPERIMENTAL
 		}
 
