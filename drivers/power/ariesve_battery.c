@@ -57,6 +57,7 @@ extern int charging_boot;
 #include <linux/gpio.h>
 #include <linux/mfd/pmic8058.h>
 #include <linux/wakelock.h>
+#include <linux/fastchg.h>
 
 #ifdef CONFIG_WIRELESS_CHARGING
 #define IRQ_WC_DETECT PM8058_GPIO_IRQ(PMIC8058_IRQ_BASE, (PM8058_GPIO(35)))
@@ -1953,10 +1954,25 @@ static void msm_batt_cable_status_update(void)
 	if (charger_type != CHARGER_TYPE_NONE)	// USB, TA, Wireless
 	{
 		if (charger_type == CHARGER_TYPE_USB_PC)
-		{
+			if (charger_type == CHARGER_TYPE_USB_PC)
+{
+	#ifdef CONFIG_FORCE_FAST_CHARGE
+		if (force_fast_charge != 0) {
+			pr_info("cable USB forced fast charge");
+			msm_batt_info.charging_source = AC_CHG;
+			hsusb_chg_connected_ext(USB_CHG_TYPE__WALLCHARGER);
+			power_supply_changed(&msm_psy_ac);
+		} else {
+			pr_info("cable USB");
 			msm_batt_info.charging_source = USB_CHG;
 			hsusb_chg_connected_ext(USB_CHG_TYPE__SDP);
 			power_supply_changed(&msm_psy_usb);
+		}
+		#else
+			msm_batt_info.charging_source = USB_CHG;
+			hsusb_chg_connected_ext(USB_CHG_TYPE__SDP);
+			power_supply_changed(&msm_psy_usb);
+		#endif
 		}
 		else	// TA and Wireless
 		{
